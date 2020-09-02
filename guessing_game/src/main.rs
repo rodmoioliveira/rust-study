@@ -3,11 +3,8 @@ use std::cmp::Ordering;
 use std::io;
 
 fn main() {
-    let secret_number = rand::thread_rng().gen_range(1, 101);
-
     println!("Guess the number!");
-    println!("The secret number is: {}", secret_number);
-
+    let secret_number = rand::thread_rng().gen_range(1, 11);
     loop {
         let mut guess = String::new();
         println!("Please input a guess:");
@@ -18,7 +15,14 @@ fn main() {
             .read_line(&mut guess)
             .expect("Failed to read line!");
 
-        let guess: u32 = guess.trim().parse().expect("Please type a number!");
+        let guess: u32 = match guess.trim().parse() {
+            // Switching from an expect call to a match expression is how you generally move from crashing on an error to handling the error. Remember that parse returns a Result type and Result is an enum that has the variants Ok or Err. We’re using a match expression here, as we did with the Ordering result of the cmp method.
+            Ok(num) => num,
+            Err(_) => {
+                println!("[ Not a number! ]");
+                continue;
+            }
+        };
 
         println!("You guessed: {}", guess);
 
