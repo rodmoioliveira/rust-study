@@ -37,4 +37,131 @@ fn main() {
     // Data Types
     // https://doc.rust-lang.org/book/ch03-02-data-types.html
     // =======================================
+
+    // =======================================
+    // Scalar Types
+    // =======================================
+
+    // A scalar type represents a single value. Rust has four primary scalar types: integers, floating-point numbers, Booleans, and characters.
+
+    // =======================================
+    // Integer Types
+    // =======================================
+    let decimal = 98_222;
+    let hex = 0xffffff;
+    let octal = 0o77;
+    let binary = 0b1111_0000;
+    let byte = b'A';
+    println!(
+        "Decimal is {}\nhex is {}\noctal is {}\nbinary is {}\nbyte is {}",
+        decimal, hex, octal, binary, byte
+    );
+
+    // =======================================
+    // Floating-Point Types
+    // =======================================
+    // Rust also has two primitive types for floating-point numbers, which are numbers with decimal points. Rust’s floating-point types are f32 and f64, which are 32 bits and 64 bits in size, respectively. The default type is f64 because on modern CPUs it’s roughly the same speed as f32 but is capable of more precision.
+
+    let _x = 2.0; // f64
+    let _y: f32 = 3.0; // f32
+
+    // =======================================
+    // Numeric Operations
+    // =======================================
+
+    // addition
+    let sum = 5 + 10;
+
+    // subtraction
+    let difference = 95.5 - 4.3;
+
+    // multiplication
+    let product = 4 * 30;
+
+    // division
+    let quotient = 56.7 / 32.2;
+
+    // remainder
+    let remainder = 43 % 5;
+
+    println!(
+        "sum is {}\ndifference is {}\nproduct is {}\nquocient is {}\nremainder is {}",
+        sum, difference, product, quotient, remainder
+    );
+
+    // =======================================
+    // The Boolean Type
+    // =======================================
+    let _t = true;
+    let _f: bool = false; // with explicit type annotation
+
+    // =======================================
+    // The Character Type
+    // =======================================
+
+    // So far we’ve worked only with numbers, but Rust supports letters too. Rust’s char type is the language’s most primitive alphabetic type, and the following code shows one way to use it. (Note that char literals are specified with single quotes, as opposed to string literals, which use double quotes.)
+    let _c = 'z';
+    let _z = 'ℤ';
+    let _heart_eyed_cat = '😻';
+
+    // =======================================
+    // Compound Types
+    // =======================================
+    // Compound types can group multiple values into one type. Rust has two primitive compound types: tuples and arrays.
+
+    // =======================================
+    // The Tuple Type
+    // =======================================
+
+    // A tuple is a general way of grouping together a number of values with a variety of types into one compound type. Tuples have a fixed length: once declared, they cannot grow or shrink in size.
+
+    // We create a tuple by writing a comma-separated list of values inside parentheses. Each position in the tuple has a type, and the types of the different values in the tuple don’t have to be the same. We’ve added optional type annotations in this example:
+
+    let tup: (i32, f64, u8) = (500, 6.4, 1);
+    let (_x, y, _z) = tup;
+    println!("The value of y is: {}", y);
+
+    // In addition to destructuring through pattern matching, we can access a tuple element directly by using a period (.) followed by the index of the value we want to access. For example:
+
+    let five_hundred = tup.0;
+    let six_point_four = tup.1;
+    let one = tup.2;
+
+    println!("{}", five_hundred);
+    println!("{}", six_point_four);
+    println!("{}", one);
+
+    // =======================================
+    // The Array Type
+    // =======================================
+    // Another way to have a collection of multiple values is with an array. Unlike a tuple, every element of an array must have the same type. Arrays in Rust are different from arrays in some other languages because arrays in Rust have a fixed length, like tuples.
+
+    // In Rust, the values going into an array are written as a comma-separated list inside square brackets:
+    let a: [i32; 5] = [1, 2, 3, 4, 5];
+    println!("{}", a[4]);
+
+    // Arrays are useful when you want your data allocated on the stack rather than the heap (we will discuss the stack and the heap more in Chapter 4) or when you want to ensure you always have a fixed number of elements. An array isn’t as flexible as the vector type, though. A vector is a similar collection type provided by the standard library that is allowed to grow or shrink in size. If you’re unsure whether to use an array or a vector, you should probably use a vector. Chapter 8 discusses vectors in more detail.
+    // https://www.geeksforgeeks.org/memory-layout-of-c-program/
+    // https://www.geeksforgeeks.org/stack-vs-heap-memory-allocation/
+
+    // An example of when you might want to use an array rather than a vector is in a program that needs to know the names of the months of the year. It’s very unlikely that such a program will need to add or remove months, so you can use an array because you know it will always contain 12 elements:
+
+    let _months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+
+    // Writing an array’s type this way looks similar to an alternative syntax for initializing an array: if you want to create an array that contains the same value for each element, you can specify the initial value, followed by a semicolon, and then the length of the array in square brackets, as shown here:
+
+    let _a = [3; 5];
 }
