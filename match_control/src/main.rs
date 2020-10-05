@@ -116,6 +116,58 @@ fn value_in_cents_2(coin: Coin_2) -> u8 {
 // Matching with Option<T>
 // https://doc.rust-lang.org/book/ch06-02-match.html#matching-with-optiont
 // =======================================
+// In the previous section, we wanted to get the inner T value out of the Some case when using
+// Option<T>; we can also handle Option<T> using match as we did with the Coin enum! Instead of
+// comparing coins, we’ll compare the variants of Option<T>, but the way that the match expression
+// works remains the same.
+
+// Let’s say we want to write a function that takes an Option<i32> and, if there’s a value inside,
+// adds 1 to that value. If there isn’t a value inside, the function should return the None value
+// and not attempt to perform any operations.
+
+// This function is very easy to write, thanks to match, and will look like Listing 6-5.
+fn plus_one(x: Option<i32>) -> Option<i32> {
+    match x {
+        Some(i) => Some(i + 1),
+        None => None,
+    }
+}
+
+// Let’s examine the first execution of plus_one in more detail. When we call plus_one(five), the
+// variable x in the body of plus_one will have the value Some(5). We then compare that against
+// each match arm.
+
+// None => None,
+
+// The Some(5) value doesn’t match the pattern None, so we continue to the next arm.
+
+// Some(i) => Some(i + 1),
+
+// Does Some(5) match Some(i)? Why yes it does! We have the same variant. The i binds to the value
+// contained in Some, so i takes the value 5. The code in the match arm is then executed, so we add
+// 1 to the value of i and create a new Some value with our total 6 inside.
+
+// Now let’s consider the second call of plus_one in Listing 6-5, where x is None. We enter the
+// match and compare to the first arm.
+
+// None => None,
+
+// It matches! There’s no value to add to, so the program stops and returns the None value on the
+// right side of =>. Because the first arm matched, no other arms are compared.
+
+// Combining match and enums is useful in many situations. You’ll see this pattern a lot in Rust
+// code: match against an enum, bind a variable to the data inside, and then execute code based on
+// it. It’s a bit tricky at first, but once you get used to it, you’ll wish you had it in all
+// languages. It’s consistently a user favorite.
+
+// =======================================
+// Matches Are Exhaustive
+// https://doc.rust-lang.org/book/ch06-02-match.html#matches-are-exhaustive
+// =======================================
+// Matches in Rust are exhaustive: we must exhaust every last possibility in order for the code to
+// be valid. Especially in the case of Option<T>, when Rust prevents us from forgetting to
+// explicitly handle the None case, it protects us from assuming that we have a value when we might
+// have null, thus making the billion-dollar mistake discussed earlier impossible.
 
 fn main() {
     let p = Coin::Penny;
@@ -138,4 +190,38 @@ fn main() {
 
     value_in_cents_2(alamaba);
     value_in_cents_2(alaska);
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+
+    println!("{:?} {:?} {:?}", five, six, none);
+
+    // =======================================
+    // The _ Placeholder
+    // https://doc.rust-lang.org/book/ch06-02-match.html#the-_-placeholder
+    // =======================================
+    // Rust also has a pattern we can use when we don’t want to list all possible values. For example,
+    // a u8 can have valid values of 0 through 255. If we only care about the values 1, 3, 5, and 7, we
+    // don’t want to have to list out 0, 2, 4, 6, 8, 9 all the way up to 255. Fortunately, we don’t
+    // have to: we can use the special pattern _ instead:
+
+    let some_u8_value = 0u8;
+    match some_u8_value {
+        1 => println!("one"),
+        3 => println!("three"),
+        5 => println!("five"),
+        7 => println!("seven"),
+        _ => (),
+    }
+
+    // The _ pattern will match any value. By putting it after our other arms, the _ will match all the
+    // possible cases that aren’t specified before it. The () is just the unit value, so nothing will
+    // happen in the _ case. As a result, we can say that we want to do nothing for all the possible
+    // values that we don’t list before the _ placeholder.
+
+    // However, the match expression can be a bit wordy in a situation in which we care about only one
+    // of the cases. For this situation, Rust provides if let.
+
+    // More about patterns and matching can be found in chapter 18.
 }
