@@ -1,6 +1,6 @@
 [package]
 name = "match_control"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Rodolfo Mói de Oliveira <rodmoi.oliveira@gmail.com>"]
 edition = "2018"
 
