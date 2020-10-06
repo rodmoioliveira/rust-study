@@ -27,19 +27,29 @@
 // restaurant; then put the code in Listing 7-1 into src/lib.rs to define some modules and function
 // signatures.
 
-mod front_of_house {
-    mod hosting {
-        fn add_to_waitlist() {}
+pub mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {
+            println!("add_to_waitlist");
+        }
 
-        fn seat_at_table() {}
+        pub fn seat_at_table() {
+            println!("seat_at_table");
+        }
     }
 
-    mod serving {
-        fn take_order() {}
+    pub mod serving {
+        pub fn take_order() {
+            println!("take_order");
+        }
 
-        fn serve_order() {}
+        pub fn serve_order() {
+            println!("serve_order");
+        }
 
-        fn take_payment() {}
+        pub fn take_payment() {
+            println!("take_payment");
+        }
     }
 }
 
