@@ -1,7 +1,10 @@
-use restaurant::back_of_house;
-use restaurant::eat_at_restaurant;
-use restaurant::front_of_house;
-use restaurant::pay_restaurant;
+use restaurant::{back_of_house, eat_at_restaurant, front_of_house, pay_restaurant};
+
+// use restaurant::back_of_house;
+// use restaurant::eat_at_restaurant;
+// use restaurant::front_of_house;
+// use restaurant::pay_restaurant;
+
 // use restaurant::*;
 
 fn main() {
