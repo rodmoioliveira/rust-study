@@ -283,3 +283,44 @@ pub mod back_of_house {
     // system feature: the use keyword. We’ll cover use by itself first, and then we’ll show how to
     // combine pub and use.
 }
+
+// =======================================
+// Bringing Paths into Scope with the use Keyword
+// =======================================
+// It might seem like the paths we’ve written to call functions so far are inconveniently long and
+// repetitive. For example, in Listing 7-7, whether we chose the absolute or relative path to the
+// add_to_waitlist function, every time we wanted to call add_to_waitlist we had to specify
+// front_of_house and hosting too. Fortunately, there’s a way to simplify this process. We can
+// bring a path into a scope once and then call the items in that path as if they’re local items
+// with the use keyword.
+
+// In Listing 7-11, we bring the crate::front_of_house::hosting module into the scope of the
+// eat_at_restaurant function so we only have to specify hosting::add_to_waitlist to call the
+// add_to_waitlist function in eat_at_restaurant.
+use self::front_of_house::hosting;
+
+// Adding use and a path in a scope is similar to creating a symbolic link in the filesystem. By
+// adding use crate::front_of_house::hosting in the crate root, hosting is now a valid name in that
+// scope, just as though the hosting module had been defined in the crate root. Paths brought into
+// scope with use also check privacy, like any other paths.
+
+// You can also bring an item into scope with use and a relative path. Listing 7-12 shows how to
+// specify a relative path to get the same behavior as in Listing 7-11.
+use crate::front_of_house::serving;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+    hosting::add_to_waitlist();
+    hosting::add_to_waitlist();
+}
+
+pub fn pay_restaurant() {
+    serving::take_payment();
+    serving::take_payment();
+    serving::take_payment();
+}
+
+// =======================================
+// Creating Idiomatic use Paths
+// https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#creating-idiomatic-use-paths
+// =======================================

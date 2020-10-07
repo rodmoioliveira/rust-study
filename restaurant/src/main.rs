@@ -1,5 +1,7 @@
 use restaurant::back_of_house;
+use restaurant::eat_at_restaurant;
 use restaurant::front_of_house;
+use restaurant::pay_restaurant;
 // use restaurant::*;
 
 fn main() {
@@ -21,4 +23,7 @@ fn main() {
     println!("{:?}", breakfast);
     println!("{:?}", ap1);
     println!("{:?}", ap2);
+
+    eat_at_restaurant();
+    pay_restaurant();
 }
