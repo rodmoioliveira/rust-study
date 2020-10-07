@@ -191,3 +191,8 @@ pub mod front_of_house {
 // path starting from the module in which eat_at_restaurant is defined works. Then, because hosting
 // and add_to_waitlist are marked with pub, the rest of the path works, and this function call is
 // valid!
+
+// =======================================
+// Starting Relative Paths with super
+// https://doc.rust-lang.org/book/ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html#starting-relative-paths-with-super
+// =======================================
