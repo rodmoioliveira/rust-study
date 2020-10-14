@@ -1,3 +1,4 @@
+mod front_of_house;
 // =======================================
 // Defining Modules to Control Scope and Privacy
 // https://doc.rust-lang.org/book/ch07-02-defining-modules-to-control-scope-and-privacy.html
@@ -26,38 +27,6 @@
 // functions into nested modules. Create a new library named restaurant by running cargo new --lib
 // restaurant; then put the code in Listing 7-1 into src/lib.rs to define some modules and function
 // signatures.
-
-pub mod front_of_house {
-    pub mod hosting {
-        pub fn add_to_waitlist() {
-            println!("add_to_waitlist");
-        }
-
-        pub fn seat_at_table() {
-            println!("seat_at_table");
-        }
-    }
-
-    pub mod serving {
-        fn hide() {
-            println!("private!!!");
-        }
-
-        pub fn take_order() {
-            println!("take_order");
-        }
-
-        pub fn serve_order() {
-            println!("serve_order");
-            crate::front_of_house::serving::hide();
-            super::serving::hide();
-        }
-
-        pub fn take_payment() {
-            println!("take_payment");
-        }
-    }
-}
 
 // We define a module by starting with the mod keyword and then specify the name of the module (in
 // this case, front_of_house) and place curly brackets around the body of the module. Inside
