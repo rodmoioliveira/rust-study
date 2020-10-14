@@ -1,4 +1,5 @@
 mod front_of_house;
+
 // =======================================
 // Defining Modules to Control Scope and Privacy
 // https://doc.rust-lang.org/book/ch07-02-defining-modules-to-control-scope-and-privacy.html
