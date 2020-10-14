@@ -1,32 +1,29 @@
-use restaurant::{back_of_house, eat_at_restaurant, front_of_house, pay_restaurant};
-
-// use restaurant::back_of_house;
-// use restaurant::eat_at_restaurant;
-// use restaurant::front_of_house;
-// use restaurant::pay_restaurant;
-
-// use restaurant::*;
+use restaurant::{
+    self as res,
+    back_of_house::{Appetizer, Breakfast},
+    hosting, serving,
+};
 
 fn main() {
-    front_of_house::hosting::add_to_waitlist();
-    front_of_house::hosting::seat_at_table();
-    front_of_house::serving::take_order();
-    front_of_house::serving::take_payment();
-    front_of_house::serving::serve_order();
+    hosting::add_to_waitlist();
+    hosting::seat_at_table();
+    serving::take_order();
+    serving::take_payment();
+    serving::serve_order();
 
-    let mut breakfast = back_of_house::Breakfast::summer("rye");
+    let mut breakfast = Breakfast::summer("rye");
     breakfast.toast = String::from("wheat");
 
     // // private, will break the code...
     // breakfast.seasonal_fruit = String::from("apple");
 
-    let ap1 = back_of_house::Appetizer::Soup;
-    let ap2 = back_of_house::Appetizer::Salad;
+    let ap1 = Appetizer::Soup;
+    let ap2 = Appetizer::Salad;
 
     println!("{:?}", breakfast);
     println!("{:?}", ap1);
     println!("{:?}", ap2);
 
-    eat_at_restaurant();
-    pay_restaurant();
+    res::eat_at_restaurant();
+    res::pay_restaurant();
 }
