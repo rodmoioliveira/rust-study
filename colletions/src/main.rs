@@ -138,4 +138,9 @@ fn main() {
     // documentation for all the many useful methods defined on Vec<T> by the standard library. For
     // example, in addition to push, a pop method removes and returns the last element. Let’s move on
     // to the next collection type: String!
+
+    // =======================================
+    // Storing UTF-8 Encoded Text with Strings
+    // https://doc.rust-lang.org/book/ch08-02-strings.html
+    // =======================================
 }
