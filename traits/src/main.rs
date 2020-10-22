@@ -43,6 +43,9 @@ fn main() {
         content: String::from("is a nice language..."),
     };
 
+    // After implementing the trait, we can call the methods on instances of NewsArticle and Tweet in
+    // the same way we call regular methods, like this:
+
     println!("{}", my_tweet.summarize());
     println!("{}", my_article.summarize());
 }
