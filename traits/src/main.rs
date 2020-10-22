@@ -27,15 +27,22 @@
 // need to request that summary by calling a summarize method on an instance. Listing 10-12 shows
 // the definition of a Summary trait that expresses this behavior.
 
-mod lib;
-use lib::{Summary, Tweet};
+use traits::aggregator::{self, Summary};
 
 fn main() {
-    let my_tweet = Tweet {
+    let my_tweet = aggregator::Tweet {
         username: String::from("rodolfo"),
         content: String::from("um tweet qualquer..."),
         reply: false,
         retweet: false,
     };
+    let my_article = aggregator::NewsArticle {
+        headline: String::from("Learning Rust!"),
+        location: String::from("Rio de Janeiro"),
+        author: String::from("Rodolfo Oliveira"),
+        content: String::from("is a nice language..."),
+    };
+
     println!("{}", my_tweet.summarize());
+    println!("{}", my_article.summarize());
 }
