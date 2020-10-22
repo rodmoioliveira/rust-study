@@ -389,9 +389,4 @@ fn main() {
     // runtime cost for using generics. When the code runs, it performs just as it would if we had
     // duplicated each definition by hand. The process of monomorphization makes Rust’s generics
     // extremely efficient at runtime.
-
-    // =======================================
-    // Traits: Defining Shared Behavior
-    // https://doc.rust-lang.org/book/ch10-02-traits.html#traits-defining-shared-behavior
-    // =======================================
 }
