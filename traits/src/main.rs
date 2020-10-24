@@ -27,7 +27,7 @@
 // need to request that summary by calling a summarize method on an instance. Listing 10-12 shows
 // the definition of a Summary trait that expresses this behavior.
 
-use traits::aggregator::{self, Summary};
+use traits::aggregator::{self, DefaultSummary, Pair, Summary};
 
 fn main() {
     let my_tweet = aggregator::Tweet {
@@ -42,10 +42,29 @@ fn main() {
         author: String::from("Rodolfo Oliveira"),
         content: String::from("is a nice language..."),
     };
+    let test = 1;
 
     // After implementing the trait, we can call the methods on instances of NewsArticle and Tweet in
     // the same way we call regular methods, like this:
 
-    println!("{}", my_tweet.summarize());
-    println!("{}", my_article.summarize());
+    // println!("{}", my_tweet.summarize());
+    // println!("{}", my_article.summarize());
+    // println!("{}", my_tweet.def_summarize());
+    // println!("{}", my_article.def_summarize());
+
+    aggregator::notify(&my_tweet);
+    aggregator::notify(&my_article);
+    aggregator::notify2(&my_tweet);
+    aggregator::notify2(&my_article);
+    // aggregator::notify(&test);
+    aggregator::notify_same_type(&my_tweet, &my_tweet);
+    aggregator::notify_differ_types(&my_article, &my_tweet);
+
+    let n_pair = Pair::new(3, 4);
+    let c_pair = Pair::new('v', 'A');
+    n_pair.cmp_display();
+    c_pair.cmp_display();
+
+    // let x_pair = Pair::new(&my_tweet, &my_tweet);
+    // x_pair.cmp_display();
 }

@@ -69,10 +69,10 @@ fn largest_char(list: &[char]) -> &char {
 // std::cmp::PartialOrd trait that you can implement on types (see Appendix C for more on this
 // trait). You’ll learn how to specify that a generic type has a particular trait in the “Traits as
 // Parameters” section, but let’s first explore other ways of using generic type parameters.
-fn largest_generic<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
-    let mut largest = &list[0];
+fn largest_generic<T: PartialOrd + Copy>(list: &[T]) -> T {
+    let mut largest = list[0];
 
-    for item in list {
+    for &item in list {
         if item > largest {
             largest = item;
         }
@@ -80,6 +80,17 @@ fn largest_generic<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
 
     largest
 }
+
+// If we don’t want to restrict the largest function to the types that implement the Copy trait, we
+// could specify that T has the trait bound Clone instead of Copy. Then we could clone each value
+// in the slice when we want the largest function to have ownership. Using the clone function means
+// we’re potentially making more heap allocations in the case of types that own heap data like
+// String, and heap allocations can be slow if we’re working with large amounts of data.
+
+// Another way we could implement largest is for the function to return a reference to a T value in
+// the slice. If we change the return type to &T instead of T, thereby changing the body of the
+// function to return a reference, we wouldn’t need the Clone or Copy trait bounds and we could
+// avoid heap allocations. Try implementing these alternate solutions on your own!
 
 fn main() {
     // =======================================
