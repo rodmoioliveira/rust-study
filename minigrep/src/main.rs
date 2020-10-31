@@ -48,6 +48,7 @@
 
 use std::env;
 use std::fs;
+use std::process;
 
 fn main() {
     // To enable minigrep to read the values of command line arguments we pass to it, we’ll need a
@@ -228,11 +229,11 @@ fn main() {
     // to configure how the program will work. Any code that uses these values knows to find them in
     // the config instance in the fields named for their purpose.
 
-    let config = parse_config(&args);
-    let contents =
-        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
-    println!("Query {}", config.query);
-    println!("With text:\n{}", contents);
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
+    run(config);
 
     // We’re still collecting the command line arguments into a vector, but instead of assigning
     // the argument value at index 1 to the variable query and the argument value at index 2 to the
@@ -298,9 +299,166 @@ struct Config {
     filename: String,
 }
 
-fn parse_config(args: &[String]) -> Config {
-    let query = args[1].clone();
-    let filename = args[2].clone();
+// So far, we’ve extracted the logic responsible for parsing the command line arguments from main
+// and placed it in the parse_config function. Doing so helped us to see that the query and
+// filename values were related and that relationship should be conveyed in our code. We then added
+// a Config struct to name the related purpose of query and filename and to be able to return the
+// values’ names as struct field names from the parse_config function.
 
-    Config { query, filename }
+// So now that the purpose of the parse_config function is to create a Config instance, we can
+// change parse_config from a plain function to a function named new that is associated with the
+// Config struct. Making this change will make the code more idiomatic. We can create instances of
+// types in the standard library, such as String, by calling String::new. Similarly, by changing
+// parse_config into a new function associated with Config, we’ll be able to create instances of
+// Config by calling Config::new. Listing 12-7 shows the changes we need to make.
+
+// impl Config {
+//     fn new(args: &[String]) -> Config {
+//         let query = args[1].clone();
+//         let filename = args[2].clone();
+
+//         Config { query, filename }
+//     }
+// }
+
+// =======================================
+// Fixing the Error Handling
+// =======================================
+// Now we’ll work on fixing our error handling. Recall that attempting to access the values in the
+// args vector at index 1 or index 2 will cause the program to panic if the vector contains fewer
+// than three items. Try running the program without any arguments; it will look like this:
+
+// $ cargo run
+// Compiling minigrep v0.1.0 (file:///projects/minigrep)
+//  Finished dev [unoptimized + debuginfo] target(s) in 0.0s
+//   Running `target/debug/minigrep`
+// thread 'main' panicked at 'index out of bounds: the len is 1 but the index is 1', src/main.rs:27:21
+// note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
+
+// The line index out of bounds: the len is 1 but the index is 1 is an error message intended for
+// programmers. It won’t help our end users understand what happened and what they should do instead.
+// Let’s fix that now.
+
+// =======================================
+// Improving the Error Message
+// =======================================
+
+// In Listing 12-8, we add a check in the new function that will verify that the slice is long
+// enough before accessing index 1 and 2. If the slice isn’t long enough, the program panics and
+// displays a better error message than the index out of bounds message.
+
+// impl Config {
+//     fn new(args: &[String]) -> Config {
+//         if args.len() < 3 {
+//             panic!("not enough arguments");
+//         }
+//         let query = args[1].clone();
+//         let filename = args[2].clone();
+
+//         Config { query, filename }
+//     }
+// }
+
+// This code is similar to the Guess::new function we wrote in Listing 9-10, where we called panic!
+// when the value argument was out of the range of valid values. Instead of checking for a range of
+// values here, we’re checking that the length of args is at least 3 and the rest of the function
+// can operate under the assumption that this condition has been met. If args has fewer than three
+// items, this condition will be true, and we call the panic! macro to end the program immediately.
+
+// This output is better: we now have a reasonable error message. However, we also have extraneous
+// information we don’t want to give to our users. Perhaps using the technique we used in Listing
+// 9-10 isn’t the best to use here: a call to panic! is more appropriate for a programming problem
+// than a usage problem, as discussed in Chapter 9. Instead, we can use the other technique you
+// learned about in Chapter 9—returning a Result that indicates either success or an error.
+
+// =======================================
+// Returning a Result from new Instead of Calling panic!
+// =======================================
+// We can instead return a Result value that will contain a Config instance in the successful case
+// and will describe the problem in the error case. When Config::new is communicating to main, we
+// can use the Result type to signal there was a problem. Then we can change main to convert an Err
+// variant into a more practical error for our users without the surrounding text about thread
+// 'main' and RUST_BACKTRACE that a call to panic! causes.
+
+// Listing 12-9 shows the changes we need to make to the return value of Config::new and the body
+// of the function needed to return a Result. Note that this won’t compile until we update main as
+// well, which we’ll do in the next listing.
+
+impl Config {
+    fn new(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let filename = args[2].clone();
+
+        Ok(Config { query, filename })
+    }
 }
+
+// Our new function now returns a Result with a Config instance in the success case and a &'static
+// str in the error case. Recall from “The Static Lifetime” section in Chapter 10 that &'static str
+// is the type of string literals, which is our error message type for now.
+
+// We’ve made two changes in the body of the new function: instead of calling panic! when the user
+// doesn’t pass enough arguments, we now return an Err value, and we’ve wrapped the Config return
+// value in an Ok. These changes make the function conform to its new type signature.
+
+// Returning an Err value from Config::new allows the main function to handle the Result value
+// returned from the new function and exit the process more cleanly in the error case.
+
+// =======================================
+// Calling Config::new and Handling Errors
+// =======================================
+// To handle the error case and print a user-friendly message, we need to update main to handle the
+// Result being returned by Config::new, as shown in Listing 12-10. We’ll also take the
+// responsibility of exiting the command line tool with a nonzero error code from panic! and
+// implement it by hand. A nonzero exit status is a convention to signal to the process that called
+// our program that the program exited with an error state.
+
+// In this listing, we’ve used a method we haven’t covered before: unwrap_or_else, which is defined
+// on Result<T, E> by the standard library. Using unwrap_or_else allows us to define some custom,
+// non-panic! error handling. If the Result is an Ok value, this method’s behavior is similar to
+// unwrap: it returns the inner value Ok is wrapping. However, if the value is an Err value, this
+// method calls the code in the closure, which is an anonymous function we define and pass as an
+// argument to unwrap_or_else. We’ll cover closures in more detail in Chapter 13. For now, you just
+// need to know that unwrap_or_else will pass the inner value of the Err, which in this case is the
+// static string not enough arguments that we added in Listing 12-9, to our closure in the argument
+// err that appears between the vertical pipes. The code in the closure can then use the err value
+// when it runs.
+
+// We’ve added a new use line to bring process from the standard library into scope. The code in
+// the closure that will be run in the error case is only two lines: we print the err value and
+// then call process::exit. The process::exit function will stop the program immediately and return
+// the number that was passed as the exit status code. This is similar to the panic!-based handling
+// we used in Listing 12-8, but we no longer get all the extra output.
+
+// =======================================
+// Extracting Logic from main
+// =======================================
+// Now that we’ve finished refactoring the configuration parsing, let’s turn to the program’s
+// logic. As we stated in “Separation of Concerns for Binary Projects”, we’ll extract a function
+// named run that will hold all the logic currently in the main function that isn’t involved with
+// setting up configuration or handling errors. When we’re done, main will be concise and easy to
+// verify by inspection, and we’ll be able to write tests for all the other logic.
+
+// Listing 12-11 shows the extracted run function. For now, we’re just making the small,
+// incremental improvement of extracting the function. We’re still defining the function in
+// src/main.rs.
+
+fn run(config: Config) {
+    let contents =
+        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+
+    println!("Query {}", config.query);
+    println!("With text:\n{}", contents);
+}
+
+// The run function now contains all the remaining logic from main, starting from reading the file.
+// The run function takes the Config instance as an argument.
+
+// =======================================
+// Returning Errors from the run Function
+// https://doc.rust-lang.org/book/ch12-03-improving-error-handling-and-modularity.html#returning-errors-from-the-run-function
+// =======================================
