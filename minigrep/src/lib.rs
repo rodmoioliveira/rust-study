@@ -193,3 +193,8 @@ Pick three.";
 // To round out this project, we’ll briefly demonstrate how to work with environment variables and
 // how to print to standard error, both of which are useful when you’re writing command line
 // programs.
+
+// =======================================
+// Working with Environment Variables
+// https://doc.rust-lang.org/book/ch12-05-working-with-environment-variables.html
+// =======================================
