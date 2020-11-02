@@ -126,6 +126,8 @@ fn generate_workout(intensity: u32, random_number: u32) {
     // at the cost of being more verbose than is strictly necessary. Annotating the types for the
     // closure we defined in Listing 13-5 would look like the definition shown in Listing 13-7.
 
+    use closures::Cacher;
+
     let closure = |num| {
         println!("calculating slowly...");
         thread::sleep(Duration::from_secs(2));
@@ -312,13 +314,13 @@ fn main() {
 // Listing 13-9 shows the definition of the Cacher struct that holds a closure and an optional
 // result value.
 
-struct Cacher<T>
-where
-    T: Fn(u32) -> u32,
-{
-    calculation: T,
-    value: Option<u32>,
-}
+// struct Cacher<T>
+// where
+//     T: Fn(u32) -> u32,
+// {
+//     calculation: T,
+//     value: Option<u32>,
+// }
 
 // The Cacher struct has a calculation field of the generic type T. The trait bounds on T specify
 // that it’s a closure by using the Fn trait. Any closure we want to store in the calculation field
@@ -337,29 +339,29 @@ where
 
 // The logic around the value field we’ve just described is defined in Listing 13-10.
 
-impl<T> Cacher<T>
-where
-    T: Fn(u32) -> u32,
-{
-    fn new(calculation: T) -> Cacher<T> {
-        Cacher {
-            calculation,
-            value: None,
-        }
-    }
+// impl<T> Cacher<T>
+// where
+//     T: Fn(u32) -> u32,
+// {
+//     fn new(calculation: T) -> Cacher<T> {
+//         Cacher {
+//             calculation,
+//             value: None,
+//         }
+//     }
 
-    fn value(&mut self, arg: u32) -> u32 {
-        match self.value {
-            // memoization...
-            Some(v) => v,
-            None => {
-                let v = (self.calculation)(arg);
-                self.value = Some(v);
-                v
-            }
-        }
-    }
-}
+//     fn value(&mut self, arg: u32) -> u32 {
+//         match self.value {
+//             // memoization...
+//             Some(v) => v,
+//             None => {
+//                 let v = (self.calculation)(arg);
+//                 self.value = Some(v);
+//                 v
+//             }
+//         }
+//     }
+// }
 
 // We want Cacher to manage the struct fields’ values rather than letting the calling code
 // potentially change the values in these fields directly, so these fields are private.
