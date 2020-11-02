@@ -280,6 +280,90 @@ fn main() {
     // of x and the return type of the closure to be String. Those types are then locked in to the
     // closure in example_closure, and we get a type error if we try to use a different type with
     // the same closure.
+
+    // =======================================
+    // Capturing the Environment with Closures
+    // https://doc.rust-lang.org/book/ch13-01-closures.html#capturing-the-environment-with-closures
+    // =======================================
+
+    // In the workout generator example, we only used closures as inline anonymous functions.
+    // However, closures have an additional capability that functions don’t have: they can capture
+    // their environment and access variables from the scope in which they’re defined.
+
+    // Listing 13-12 has an example of a closure stored in the equal_to_x variable that uses the x
+    // variable from the closure’s surrounding environment.
+
+    let x = 4;
+    let equal_to_x = |z| z == x;
+    let y = 4;
+    assert!(equal_to_x(y));
+
+    // Here, even though x is not one of the parameters of equal_to_x, the equal_to_x closure is
+    // allowed to use the x variable that’s defined in the same scope that equal_to_x is defined
+    // in.
+
+    // We can’t do the same with functions; if we try with the following example, our code won’t
+    // compile:
+
+    // let x = 4;
+    // fn equal_to_x(z: i32) -> bool {
+    //     z == x
+    // }
+    // let y = 4;
+    // assert!(equal_to_x(y));
+
+    // The compiler even reminds us that this only works with closures!
+
+    // When a closure captures a value from its environment, it uses memory to store the values for use
+    // in the closure body. This use of memory is overhead that we don’t want to pay in more common
+    // cases where we want to execute code that doesn’t capture its environment. Because functions are
+    // never allowed to capture their environment, defining and using functions will never incur this
+    // overhead.
+
+    // Closures can capture values from their environment in three ways, which directly map to the
+    // three ways a function can take a parameter: taking ownership, borrowing mutably, and borrowing
+    // immutably. These are encoded in the three Fn traits as follows:
+
+    // 1- FnOnce consumes the variables it captures from its enclosing scope, known as the closure’s
+    // environment. To consume the captured variables, the closure must take ownership of these
+    // variables and move them into the closure when it is defined. The Once part of the name
+    // represents the fact that the closure can’t take ownership of the same variables more than once,
+    // so it can be called only once.
+    // 2- FnMut can change the environment because it mutably borrows values.
+    // 3- Fn borrows values from the environment immutably.
+
+    // When you create a closure, Rust infers which trait to use based on how the closure uses the
+    // values from the environment. All closures implement FnOnce because they can all be called at
+    // least once. Closures that don’t move the captured variables also implement FnMut, and
+    // closures that don’t need mutable access to the captured variables also implement Fn. In
+    // Listing 13-12, the equal_to_x closure borrows x immutably (so equal_to_x has the Fn trait)
+    // because the body of the closure only needs to read the value in x.
+
+    // If you want to force the closure to take ownership of the values it uses in the environment, you
+    // can use the move keyword before the parameter list. This technique is mostly useful when passing
+    // a closure to a new thread to move the data so it’s owned by the new thread.
+
+    // We’ll have more examples of move closures in Chapter 16 when we talk about concurrency. For now,
+    // here’s the code from Listing 13-12 with the move keyword added to the closure definition and
+    // using vectors instead of integers, because integers can be copied rather than moved; note that
+    // this code will not yet compile.
+
+    let x = vec![1, 2, 3];
+    let equal_to_x = move |z| z == x;
+    // println!("can't use x here: {:?}", x);
+    let y = vec![1, 2, 3];
+    assert!(equal_to_x(y));
+    // println!("can’t use y here: {:?}", y);
+
+    // The x value is moved into the closure when the closure is defined, because we added the move
+    // keyword. The closure then has ownership of x, and main isn’t allowed to use x anymore in the
+    // println! statement. Removing println! will fix this example.
+
+    // Most of the time when specifying one of the Fn trait bounds, you can start with Fn and the
+    // compiler will tell you if you need FnMut or FnOnce based on what happens in the closure body.
+
+    // To illustrate situations where closures that can capture their environment are useful as
+    // function parameters, let’s move on to our next topic: iterators.
 }
 
 // =======================================
