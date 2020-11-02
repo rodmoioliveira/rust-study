@@ -46,9 +46,9 @@
 //Reading the Argument Values
 // =======================================
 
-use std::env;
-use std::fs;
-use std::process;
+// extern crate minigrep;
+use minigrep;
+use std::{env, process};
 
 fn main() {
     // To enable minigrep to read the values of command line arguments we pass to it, we’ll need a
@@ -229,11 +229,15 @@ fn main() {
     // to configure how the program will work. Any code that uses these values knows to find them in
     // the config instance in the fields named for their purpose.
 
-    let config = Config::new(&args).unwrap_or_else(|err| {
+    let config = minigrep::Config::new(&args).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
-    run(config);
+
+    if let Err(e) = minigrep::run(config) {
+        println!("Application error: {}", e);
+        process::exit(1);
+    }
 
     // We’re still collecting the command line arguments into a vector, but instead of assigning
     // the argument value at index 1 to the variable query and the argument value at index 2 to the
@@ -294,10 +298,10 @@ fn main() {
 // https://doc.rust-lang.org/book/ch12-03-improving-error-handling-and-modularity.html#creating-a-constructor-for-config
 // =======================================
 
-struct Config {
-    query: String,
-    filename: String,
-}
+// struct Config {
+//     query: String,
+//     filename: String,
+// }
 
 // So far, we’ve extracted the logic responsible for parsing the command line arguments from main
 // and placed it in the parse_config function. Doing so helped us to see that the query and
@@ -384,18 +388,18 @@ struct Config {
 // of the function needed to return a Result. Note that this won’t compile until we update main as
 // well, which we’ll do in the next listing.
 
-impl Config {
-    fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+// impl Config {
+//     fn new(args: &[String]) -> Result<Config, &'static str> {
+//         if args.len() < 3 {
+//             return Err("not enough arguments");
+//         }
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+//         let query = args[1].clone();
+//         let filename = args[2].clone();
 
-        Ok(Config { query, filename })
-    }
-}
+//         Ok(Config { query, filename })
+//     }
+// }
 
 // Our new function now returns a Result with a Config instance in the success case and a &'static
 // str in the error case. Recall from “The Static Lifetime” section in Chapter 10 that &'static str
@@ -447,13 +451,13 @@ impl Config {
 // incremental improvement of extracting the function. We’re still defining the function in
 // src/main.rs.
 
-fn run(config: Config) {
-    let contents =
-        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+// fn run(config: Config) {
+//     let contents =
+//         fs::read_to_string(config.filename).expect("Something went wrong reading the file");
 
-    println!("Query {}", config.query);
-    println!("With text:\n{}", contents);
-}
+//     println!("Query {}", config.query);
+//     println!("With text:\n{}", contents);
+// }
 
 // The run function now contains all the remaining logic from main, starting from reading the file.
 // The run function takes the Config instance as an argument.
@@ -462,3 +466,88 @@ fn run(config: Config) {
 // Returning Errors from the run Function
 // https://doc.rust-lang.org/book/ch12-03-improving-error-handling-and-modularity.html#returning-errors-from-the-run-function
 // =======================================
+// With the remaining program logic separated into the run function, we can improve the error
+// handling, as we did with Config::new in Listing 12-9. Instead of allowing the program to panic
+// by calling expect, the run function will return a Result<T, E> when something goes wrong. This
+// will let us further consolidate into main the logic around handling errors in a user-friendly
+// way. Listing 12-12 shows the changes we need to make to the signature and body of run.
+
+// fn run(config: Config) -> Result<(), Box<dyn Error>> {
+//     let contents = fs::read_to_string(config.filename)?;
+
+//     println!("Query {}", config.query);
+//     println!("With text:\n{}", contents);
+
+//     Ok(())
+// }
+
+// We’ve made three significant changes here. First, we changed the return type of the run function
+// to Result<(), Box<dyn Error>>. This function previously returned the unit type, (), and we keep
+// that as the value returned in the Ok case.
+
+// For the error type, we used the trait object Box<dyn Error> (and we’ve brought std::error::Error
+// into scope with a use statement at the top). We’ll cover trait objects in Chapter 17. For now,
+// just know that Box<dyn Error> means the function will return a type that implements the Error
+// trait, but we don’t have to specify what particular type the return value will be. This gives us
+// flexibility to return error values that may be of different types in different error cases. The
+// dyn keyword is short for “dynamic.”
+
+// Second, we’ve removed the call to expect in favor of the ? operator, as we talked about in
+// Chapter 9. Rather than panic! on an error, ? will return the error value from the current
+// function for the caller to handle.
+
+// Third, the run function now returns an Ok value in the success case. We’ve declared the run
+// function’s success type as () in the signature, which means we need to wrap the unit type value
+// in the Ok value. This Ok(()) syntax might look a bit strange at first, but using () like this is
+// the idiomatic way to indicate that we’re calling run for its side effects only; it doesn’t
+// return a value we need.
+
+// Rust tells us that our code ignored the Result value and the Result value might indicate that an
+// error occurred. But we’re not checking to see whether or not there was an error, and the
+// compiler reminds us that we probably meant to have some error-handling code here! Let’s rectify
+// that problem now.
+
+// =======================================
+// Handling Errors Returned from run in main
+// =======================================
+// We’ll check for errors and handle them using a technique similar to one we used with Config::new
+// in Listing 12-10, but with a slight difference:
+
+// We use if let rather than unwrap_or_else to check whether run returns an Err value and call
+// process::exit(1) if it does. The run function doesn’t return a value that we want to unwrap in
+// the same way that Config::new returns the Config instance. Because run returns () in the success
+// case, we only care about detecting an error, so we don’t need unwrap_or_else to return the
+// unwrapped value because it would only be ().
+
+// The bodies of the if let and the unwrap_or_else functions are the same in both cases: we print
+// the error and exit.
+
+// =======================================
+// Splitting Code into a Library Crate
+// =======================================
+// Our minigrep project is looking good so far! Now we’ll split the src/main.rs file and put some
+// code into the src/lib.rs file so we can test it and have a src/main.rs file with fewer
+// responsibilities.
+
+// Let’s move all the code that isn’t the main function from src/main.rs to src/lib.rs:
+
+// The run function definition
+// The relevant use statements
+// The definition of Config
+// The Config::new function definition
+
+// The contents of src/lib.rs should have the signatures shown in Listing 12-13 (we’ve omitted the
+// bodies of the functions for brevity). Note that this won’t compile until we modify src/main.rs
+// in Listing 12-14.
+
+// We add a use minigrep::Config line to bring the Config type from the library crate into the
+// binary crate’s scope, and we prefix the run function with our crate name. Now all the
+// functionality should be connected and should work. Run the program with cargo run and make sure
+// everything works correctly.
+
+// Whew! That was a lot of work, but we’ve set ourselves up for success in the future. Now it’s
+// much easier to handle errors, and we’ve made the code more modular. Almost all of our work will
+// be done in src/lib.rs from here on out.
+
+// Let’s take advantage of this newfound modularity by doing something that would have been
+// difficult with the old code but is easy with the new code: we’ll write some tests!
