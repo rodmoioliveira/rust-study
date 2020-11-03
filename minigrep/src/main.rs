@@ -219,7 +219,7 @@ fn main() {
     // prepare for moving the command line parsing logic to src/lib.rs. Listing 12-5 shows the new start
     // of main that calls a new function parse_config, which we’ll define in src/main.rs for the moment.
 
-    let args: Vec<String> = env::args().collect();
+    // let args: Vec<String> = env::args().collect();
 
     // We’ve updated main so it places the instance of Config returned by parse_config into a variable
     // named config, and we updated the code that previously used the separate query and filename
@@ -229,7 +229,7 @@ fn main() {
     // to configure how the program will work. Any code that uses these values knows to find them in
     // the config instance in the fields named for their purpose.
 
-    let config = minigrep::Config::new(&args).unwrap_or_else(|err| {
+    let config = minigrep::Config::new(env::args()).unwrap_or_else(|err| {
         eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);
     });

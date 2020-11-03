@@ -11,35 +11,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
+        args.next();
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
 
-        // Finally, we need to check for the environment variable. The functions for working with
-        // environment variables are in the env module in the standard library, so we want to bring
-        // that module into scope with a use std::env; line at the top of src/lib.rs. Then we’ll
-        // use the var function from the env module to check for an environment variable named
-        // CASE_INSENSITIVE, as shown in Listing 12-23.
-        //
-        // Here, we create a new variable case_sensitive. To set its value, we call the env::var function and pass it the name of the CASE_INSENSITIVE environment variable. The env::var function returns a Result that will be the successful Ok variant that contains the value of the environment variable if the environment variable is set. It will return the Err variant if the environment variable is not set.
-
-        // We’re using the is_err method on the Result to check whether it’s an error and therefore unset,
-        // which means it should do a case-sensitive search. If the CASE_INSENSITIVE environment variable
-        // is set to anything, is_err will return false and the program will perform a case-insensitive
-        // search. We don’t care about the value of the environment variable, just whether it’s set or
-        // unset, so we’re checking is_err rather than using unwrap, expect, or any of the other methods
-        // we’ve seen on Result.
-
-        // We pass the value in the case_sensitive variable to the Config instance so the run function can
-        // read that value and decide whether to call search or search_case_insensitive, as we implemented
-        // in Listing 12-22.
-
-        // Let’s give it a try! First, we’ll run our program without the environment variable set and with
-        // the query to, which should match any line that contains the word “to” in all lowercase:
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file name"),
+        };
 
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
@@ -171,36 +154,42 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // same as let mut results = Vec::new();
-    let mut results = vec![];
+    // let mut results = vec![];
+
     // The lines method returns an iterator. We’ll talk about iterators in depth in Chapter 13, but
     // recall that you saw this way of using an iterator in Listing 3-5, where we used a for loop
     // with an iterator to run some code on each item in a collection.
-    for line in contents.lines() {
-        // =======================================
-        // Searching Each Line for the Query
-        // =======================================
+    // for line in contents.lines() {
+    // =======================================
+    // Searching Each Line for the Query
+    // =======================================
 
-        // Next, we’ll check whether the current line contains our query string. Fortunately, strings have
-        // a helpful method named contains that does this for us! Add a call to the contains method in the
-        // search function, as shown in Listing 12-18. Note this still won’t compile yet.
+    // Next, we’ll check whether the current line contains our query string. Fortunately, strings have
+    // a helpful method named contains that does this for us! Add a call to the contains method in the
+    // search function, as shown in Listing 12-18. Note this still won’t compile yet.
 
-        if line.contains(query) {
-            // =======================================
-            // Storing Matching Lines
-            // =======================================
-            // We also need a way to store the lines that contain our query string. For that, we can make a
-            // mutable vector before the for loop and call the push method to store a line in the vector. After
-            // the for loop, we return the vector, as shown in Listing 12-19.
-            results.push(line);
-        }
-    }
+    // if line.contains(query) {
+    // =======================================
+    // Storing Matching Lines
+    // =======================================
+    // We also need a way to store the lines that contain our query string. For that, we can make a
+    // mutable vector before the for loop and call the push method to store a line in the vector. After
+    // the for loop, we return the vector, as shown in Listing 12-19.
+    // results.push(line);
+    // }
+    // }
 
     // At this point, we could consider opportunities for refactoring the implementation of the
     // search function while keeping the tests passing to maintain the same functionality. The code
     // in the search function isn’t too bad, but it doesn’t take advantage of some useful features
     // of iterators. We’ll return to this example in Chapter 13, where we’ll explore iterators in
     // detail, and look at how to improve it.
-    results
+    // results
+
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 // =======================================
@@ -229,16 +218,20 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a st
     // lowercase all characters. Now that we’ve converted line and query to lowercase, we’ll find
     // matches no matter what the case of the query is.
 
-    let query = query.to_lowercase();
-    let mut results = Vec::new();
+    // let query = query.to_lowercase();
+    // let mut results = Vec::new();
 
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line);
-        }
-    }
+    // for line in contents.lines() {
+    //     if line.to_lowercase().contains(&query) {
+    //         results.push(line);
+    //     }
+    // }
 
-    results
+    // results
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query.to_lowercase()))
+        .collect()
 }
 
 #[cfg(test)]
