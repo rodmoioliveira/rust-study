@@ -70,3 +70,8 @@
 fn main() {
     println!("Hello, world!");
 }
+
+// =======================================
+// Cargo Workspaces
+// https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
+// =======================================
