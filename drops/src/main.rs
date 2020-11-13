@@ -260,4 +260,108 @@ fn main() {
     // RefCell<T> and the Interior Mutability Pattern
     // https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
     // =======================================
+    // Interior mutability is a design pattern in Rust that allows you to mutate data even when
+    // there are immutable references to that data; normally, this action is disallowed by the
+    // borrowing rules. To mutate data, the pattern uses unsafe code inside a data structure to
+    // bend Rust’s usual rules that govern mutation and borrowing. We haven’t yet covered unsafe
+    // code; we will in Chapter 19. We can use types that use the interior mutability pattern when
+    // we can ensure that the borrowing rules will be followed at runtime, even though the compiler
+    // can’t guarantee that. The unsafe code involved is then wrapped in a safe API, and the outer
+    // type is still immutable.
+
+    // Let’s explore this concept by looking at the RefCell<T> type that follows the interior
+    // mutability pattern.
+
+    // =======================================
+    // Enforcing Borrowing Rules at Runtime with RefCell<T>
+    // =======================================
+
+    // Unlike Rc<T>, the RefCell<T> type represents single ownership over the data it holds. So,
+    // what makes RefCell<T> different from a type like Box<T>? Recall the borrowing rules you
+    // learned in Chapter 4:
+
+    // At any given time, you can have either (but not both of) one mutable reference or any number of
+    // immutable references.  References must always be valid.  With references and Box<T>, the
+    // borrowing rules’ invariants are enforced at compile time. With RefCell<T>, these invariants are
+    // enforced at runtime. With references, if you break these rules, you’ll get a compiler error.
+    // With RefCell<T>, if you break these rules, your program will panic and exit.
+
+    // The advantages of checking the borrowing rules at compile time are that errors will be caught
+    // sooner in the development process, and there is no impact on runtime performance because all the
+    // analysis is completed beforehand. For those reasons, checking the borrowing rules at compile
+    // time is the best choice in the majority of cases, which is why this is Rust’s default.
+
+    // The advantage of checking the borrowing rules at runtime instead is that certain memory-safe
+    // scenarios are then allowed, whereas they are disallowed by the compile-time checks. Static
+    // analysis, like the Rust compiler, is inherently conservative. Some properties of code are
+    // impossible to detect by analyzing the code: the most famous example is the Halting Problem,
+    // which is beyond the scope of this book but is an interesting topic to research.
+
+    // Because some analysis is impossible, if the Rust compiler can’t be sure the code complies with
+    // the ownership rules, it might reject a correct program; in this way, it’s conservative. If Rust
+    // accepted an incorrect program, users wouldn’t be able to trust in the guarantees Rust makes.
+    // However, if Rust rejects a correct program, the programmer will be inconvenienced, but nothing
+    // catastrophic can occur. The RefCell<T> type is useful when you’re sure your code follows the
+    // borrowing rules but the compiler is unable to understand and guarantee that.
+
+    // Similar to Rc<T>, RefCell<T> is only for use in single-threaded scenarios and will give you a
+    // compile-time error if you try using it in a multithreaded context. We’ll talk about how to get
+    // the functionality of RefCell<T> in a multithreaded program in Chapter 16.
+
+    // Here is a recap of the reasons to choose Box<T>, Rc<T>, or RefCell<T>:
+
+    // Rc<T> enables multiple owners of the same data; Box<T> and RefCell<T> have single owners.
+    // Box<T> allows immutable or mutable borrows checked at compile time; Rc<T> allows only immutable
+    // borrows checked at compile time; RefCell<T> allows immutable or mutable borrows checked at
+    // runtime.
+    // Because RefCell<T> allows mutable borrows checked at runtime, you can mutate the value inside
+    // the RefCell<T> even when the RefCell<T> is immutable.
+
+    // Mutating the value inside an immutable value is the interior mutability pattern. Let’s look at a
+    // situation in which interior mutability is useful and examine how it’s possible.
+
+    // =======================================
+    // Interior Mutability: A Mutable Borrow to an Immutable Value
+    // =======================================
+
+    // A consequence of the borrowing rules is that when you have an immutable value, you can’t borrow
+    // it mutably. For example, this code won’t compile:
+
+    // let x = 5;
+    // let y = &mut x;
+
+    // However, there are situations in which it would be useful for a value to mutate itself in
+    // its methods but appear immutable to other code. Code outside the value’s methods would not
+    // be able to mutate the value. Using RefCell<T> is one way to get the ability to have interior
+    // mutability. But RefCell<T> doesn’t get around the borrowing rules completely: the borrow
+    // checker in the compiler allows this interior mutability, and the borrowing rules are checked
+    // at runtime instead. If you violate the rules, you’ll get a panic! instead of a compiler
+    // error.
+
+    // Let’s work through a practical example where we can use RefCell<T> to mutate an immutable value
+    // and see why that is useful.
+
+    // =======================================
+    // A Use Case for Interior Mutability: Mock Objects
+    // =======================================
+
+    // A test double is the general programming concept for a type used in place of another type during
+    // testing. Mock objects are specific types of test doubles that record what happens during a test
+    // so you can assert that the correct actions took place.
+
+    // Rust doesn’t have objects in the same sense as other languages have objects, and Rust doesn’t
+    // have mock object functionality built into the standard library as some other languages do.
+    // However, you can definitely create a struct that will serve the same purposes as a mock object.
+
+    // Here’s the scenario we’ll test: we’ll create a library that tracks a value against a maximum
+    // value and sends messages based on how close to the maximum value the current value is. This
+    // library could be used to keep track of a user’s quota for the number of API calls they’re
+    // allowed to make, for example.
+
+    // Our library will only provide the functionality of tracking how close to the maximum a value is
+    // and what the messages should be at what times. Applications that use our library will be
+    // expected to provide the mechanism for sending the messages: the application could put a message
+    // in the application, send an email, send a text message, or something else. The library doesn’t
+    // need to know that detail. All it needs is something that implements a trait we’ll provide called
+    // Messenger. Listing 15-20 shows the library code:
 }
