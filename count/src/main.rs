@@ -23,6 +23,8 @@ fn get_files(path: PathBuf, dir_files: &mut Vec<String>) -> io::Result<()> {
                 dir_files.push(path.to_str().unwrap().to_string());
             }
         }
+    } else {
+        dir_files.push(path.to_str().unwrap().to_string());
     }
 
     Ok(())
@@ -45,22 +47,15 @@ fn count_words(
     Ok(())
 }
 
-fn get_file_words(file: &String, table: &mut HashMap<String, u64>, re: &Regex) {
-    if let Err(e) = count_words(file, table, &re) {
-        eprintln!("Application error: {}", e);
-        process::exit(1);
-    }
-}
-
 fn main() {
-    let dir: String = env::args().nth(1).unwrap_or(".".to_string());
+    let input: String = env::args().nth(1).unwrap_or(".".to_string());
     let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
     let re_file_ext = Regex::new(r"\.(txt|js|rs|graphql)$").unwrap();
 
     let mut table: HashMap<String, u64> = HashMap::new();
     let mut dir_files: Vec<String> = Vec::new();
 
-    if let Err(e) = get_files(PathBuf::from(dir), &mut dir_files) {
+    if let Err(e) = get_files(PathBuf::from(input), &mut dir_files) {
         eprintln!("Application error: {}", e);
         process::exit(1);
     }
@@ -70,7 +65,10 @@ fn main() {
         .filter(|f| re_file_ext.is_match(f))
         .collect::<Vec<&String>>()
     {
-        get_file_words(file, &mut table, &re_pontuaction);
+        if let Err(e) = count_words(file, &mut table, &re_pontuaction) {
+            eprintln!("Application error: {}", e);
+            process::exit(1);
+        }
     }
 
     let mut result: Vec<(String, u64)> = table.into_iter().collect();
