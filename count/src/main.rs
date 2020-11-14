@@ -55,7 +55,7 @@ fn get_file_words(file: &String, table: &mut HashMap<String, u64>, re: &Regex) {
 fn main() {
     let dir: String = env::args().nth(1).unwrap_or(".".to_string());
     let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
-    let re_file_ext = Regex::new(r"\.(txt|js|rs)$").unwrap();
+    let re_file_ext = Regex::new(r"\.(txt|js|rs|graphql)$").unwrap();
 
     let mut table: HashMap<String, u64> = HashMap::new();
     let mut dir_files: Vec<String> = Vec::new();
