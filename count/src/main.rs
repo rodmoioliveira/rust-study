@@ -45,6 +45,13 @@ fn count_words(
     Ok(())
 }
 
+fn get_file_words(file: &String, table: &mut HashMap<String, u64>, re: &Regex) {
+    if let Err(e) = count_words(file, table, &re) {
+        eprintln!("Application error: {}", e);
+        process::exit(1);
+    }
+}
+
 fn main() {
     let dir: String = env::args().nth(1).unwrap_or(".".to_string());
     let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
@@ -63,10 +70,7 @@ fn main() {
         .filter(|f| re_file_ext.is_match(f))
         .collect::<Vec<&String>>()
     {
-        if let Err(e) = count_words(file, &mut table, &re_pontuaction) {
-            eprintln!("Application error: {}", e);
-            process::exit(1);
-        }
+        get_file_words(file, &mut table, &re_pontuaction);
     }
 
     let mut result: Vec<(String, u64)> = table.into_iter().collect();
