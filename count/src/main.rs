@@ -48,7 +48,8 @@ fn count_words(
 }
 
 fn main() {
-    let input: String = env::args().nth(1).unwrap_or(".".to_string());
+    let args = env::args().skip(1);
+    let mut inputs: Vec<String> = args.collect();
     let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
     let re_file_ext = Regex::new(r"\.(txt|js|rs|graphql|md)$").unwrap();
     let re_exclude_dir = Regex::new(r"(node_modules|target|\.gitlab|\.git)").unwrap();
@@ -56,9 +57,15 @@ fn main() {
     let mut table: HashMap<String, u64> = HashMap::new();
     let mut dir_files: Vec<String> = Vec::new();
 
-    if let Err(e) = get_files(PathBuf::from(input), &mut dir_files) {
-        eprintln!("Application error: {}", e);
-        process::exit(1);
+    if inputs.len() == 0 {
+        inputs.push(".".to_string());
+    }
+
+    for input in inputs {
+        if let Err(e) = get_files(PathBuf::from(input), &mut dir_files) {
+            eprintln!("Application error: {}", e);
+            process::exit(1);
+        }
     }
 
     for file in dir_files
