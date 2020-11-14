@@ -3,23 +3,25 @@ use std::{
     collections::HashMap,
     env,
     error::Error,
-    fs::{self, DirEntry},
+    fs::{self},
     io,
-    path::Path,
+    path::PathBuf,
     process,
 };
 
-fn get_files(dir: String, files: &mut Vec<String>) -> io::Result<()> {
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            if let Err(e) = get_files(path.to_str().unwrap().to_string(), files) {
-                eprintln!("Application error: {}", e);
-                process::exit(1);
+fn get_files(path: PathBuf, dir_files: &mut Vec<String>) -> io::Result<()> {
+    if path.is_dir() {
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                if let Err(e) = get_files(path, dir_files) {
+                    eprintln!("Application error: {}", e);
+                    process::exit(1);
+                }
+            } else {
+                dir_files.push(path.to_str().unwrap().to_string());
             }
-        } else {
-            files.push(path.to_str().unwrap().to_string());
         }
     }
 
@@ -27,7 +29,7 @@ fn get_files(dir: String, files: &mut Vec<String>) -> io::Result<()> {
 }
 
 fn count_words(
-    filename: String,
+    filename: &String,
     table: &mut HashMap<String, u64>,
     re: &Regex,
 ) -> Result<(), Box<dyn Error>> {
@@ -44,27 +46,33 @@ fn count_words(
 }
 
 fn main() {
-    // let mut table: HashMap<String, u64> = HashMap::new();
-    // let filename: String = env::args().nth(1).unwrap();
-    // let re = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
-    let mut files: Vec<String> = Vec::new();
+    let dir: String = env::args().nth(1).unwrap_or(".".to_string());
+    let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
+    let re_file_ext = Regex::new(r"\.(txt|js|rs)$").unwrap();
 
-    // // TODO: Recursive call de todos os arquivos dentro do diretório
-    // if let Err(e) = count_words(filename, &mut table, &re) {
-    //     eprintln!("Application error: {}", e);
-    //     process::exit(1);
-    // }
+    let mut table: HashMap<String, u64> = HashMap::new();
+    let mut dir_files: Vec<String> = Vec::new();
 
-    // let mut result: Vec<(String, u64)> = table.into_iter().collect();
-    // result.sort_by(|a, b| b.1.cmp(&a.1));
-
-    // for (name, value) in result {
-    //     println!("{}: {}", name, value);
-    // }
-
-    if let Err(e) = get_files(".".to_string(), &mut files) {
+    if let Err(e) = get_files(PathBuf::from(dir), &mut dir_files) {
         eprintln!("Application error: {}", e);
         process::exit(1);
     }
-    println!("{:?}", files);
+
+    for file in dir_files
+        .iter()
+        .filter(|f| re_file_ext.is_match(f))
+        .collect::<Vec<&String>>()
+    {
+        if let Err(e) = count_words(file, &mut table, &re_pontuaction) {
+            eprintln!("Application error: {}", e);
+            process::exit(1);
+        }
+    }
+
+    let mut result: Vec<(String, u64)> = table.into_iter().collect();
+    result.sort_by(|a, b| b.1.cmp(&a.1));
+
+    for (name, value) in result {
+        println!("{}: {}", name, value);
+    }
 }
