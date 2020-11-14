@@ -50,7 +50,8 @@ fn count_words(
 fn main() {
     let input: String = env::args().nth(1).unwrap_or(".".to_string());
     let re_pontuaction = Regex::new(r"[!-/:-@\[\]`{}-~]").unwrap();
-    let re_file_ext = Regex::new(r"\.(txt|js|rs|graphql)$").unwrap();
+    let re_file_ext = Regex::new(r"\.(txt|js|rs|graphql|md)$").unwrap();
+    let re_exclude_dir = Regex::new(r"(node_modules|target|\.gitlab|\.git)").unwrap();
 
     let mut table: HashMap<String, u64> = HashMap::new();
     let mut dir_files: Vec<String> = Vec::new();
@@ -62,6 +63,7 @@ fn main() {
 
     for file in dir_files
         .iter()
+        .filter(|f| !re_exclude_dir.is_match(f))
         .filter(|f| re_file_ext.is_match(f))
         .collect::<Vec<&String>>()
     {
