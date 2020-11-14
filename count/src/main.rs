@@ -30,7 +30,7 @@ fn main() {
     }
 
     let mut result: Vec<(String, u64)> = table.into_iter().collect();
-    result.sort_by(|a, b| a.1.cmp(&b.1));
+    result.sort_by(|a, b| b.1.cmp(&a.1));
 
     for (name, value) in result {
         println!("{}: {}", name, value);
