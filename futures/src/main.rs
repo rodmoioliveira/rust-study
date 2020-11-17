@@ -1,5 +1,7 @@
 // https://rust-lang.github.io/async-book/01_getting_started/01_chapter.html
+// https://blog.rust-lang.org/2019/11/07/Async-await-stable.html
 use futures::join;
+use reqwest;
 use std::error::Error;
 use std::{thread, time};
 
@@ -27,6 +29,11 @@ async fn fourth() -> i32 {
     400
 }
 
+async fn req() -> Result<String, Box<dyn Error>> {
+    let resp = reqwest::get("https://httpbin.org/ip").await?.text().await?;
+    Ok(resp)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let r = first().await;
@@ -34,5 +41,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (s, t) = join!(second(), third());
     println!("{} {}", s, t);
     println!("{}", fourth().await);
+    match req().await {
+        Ok(v) => println!("{}", v),
+        Err(e) => eprintln!("Application error: {}", e),
+    }
+
     Ok(())
 }
