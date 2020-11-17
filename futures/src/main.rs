@@ -2,8 +2,14 @@
 // https://blog.rust-lang.org/2019/11/07/Async-await-stable.html
 use futures::join;
 use reqwest;
+use serde::Deserialize;
 use std::error::Error;
 use std::{thread, time};
+
+#[derive(Deserialize, Debug)]
+struct Ip {
+    origin: String,
+}
 
 async fn first() -> i32 {
     let ten_millis = time::Duration::from_millis(1000);
@@ -29,8 +35,11 @@ async fn fourth() -> i32 {
     400
 }
 
-async fn req() -> Result<String, Box<dyn Error>> {
-    let resp = reqwest::get("https://httpbin.org/ip").await?.text().await?;
+async fn req() -> Result<Ip, Box<dyn Error>> {
+    let resp = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .json::<Ip>()
+        .await?;
     Ok(resp)
 }
 
@@ -42,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("{} {}", s, t);
     println!("{}", fourth().await);
     match req().await {
-        Ok(v) => println!("{}", v),
+        Ok(v) => println!("{:?}", v),
         Err(e) => eprintln!("Application error: {}", e),
     }
 
