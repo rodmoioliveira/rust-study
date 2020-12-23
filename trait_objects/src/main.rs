@@ -290,9 +290,4 @@ fn main() {
 
     // This error means you can’t use this trait as a trait object in this way. If you’re interested in
     // more details on object safety, see Rust RFC 255.
-
-    // =======================================
-    // Implementing an Object-Oriented Design Pattern
-    // https://doc.rust-lang.org/book/ch17-03-oo-design-patterns.html
-    // =======================================
 }
