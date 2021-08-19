@@ -1,4 +1,8 @@
+// =======================================
+// Problem
 // https://app.codesignal.com/arcade/intro/level-5/EEJxjQ7oo7C5wAGjE
+// =======================================
+
 // Given an array of integers, find the maximal absolute difference between any two of its adjacent elements.
 
 // Example
