@@ -20,22 +20,15 @@
 
 // The maximal absolute difference.
 
-fn array_maximal_adjancent_difference(input_array: Vec<i8>) -> i8 {
-    input_array
-        .clone()
-        .into_iter()
-        .enumerate()
-        .map(|(index, v)| match index {
-            0 => i8::MAX,
-            _ => (v - input_array[index - 1]).abs(),
-        })
-        .filter(|v| *v != i8::MAX)
-        .reduce(i8::max)
+fn array_maximal_adjancent_difference(input_array: Vec<i32>) -> i32 {
+    (1..input_array.len())
+        .map(|index| (input_array[index] - input_array[index - 1]).abs())
+        .reduce(i32::max)
         .unwrap()
 }
 
 fn main() {
-    let tests: Vec<(Vec<i8>, i8)> = vec![
+    let tests: Vec<(Vec<i32>, i32)> = vec![
         (vec![2, 4, 1, 0], 3),
         (vec![1, 1, 1, 1], 0),
         (vec![-1, 4, 10, 3, -2], 7),
