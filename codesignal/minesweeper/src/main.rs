@@ -41,7 +41,62 @@
 // least one corner.
 
 fn minesweeper(matrix: Vec<Vec<bool>>) -> Vec<Vec<i32>> {
-    vec![vec![]]
+    let mut res: Vec<Vec<i32>> = matrix
+        .clone()
+        .iter()
+        .map(|vec| vec.iter().map(|_| 0).collect())
+        .collect();
+
+    for (i, a) in matrix.iter().enumerate() {
+        for (j, b) in a.iter().enumerate() {
+            if *b {
+                let i_minus_one = i as i32 - 1;
+                let i_plus_one = i as i32 + 1;
+                let j_minus_one = j as i32 - 1;
+                let j_plus_one = j as i32 + 1;
+
+                let i_minus_one_ok = i_minus_one >= 0;
+                let i_plus_one_ok = i_plus_one < matrix.len() as i32;
+                let j_minus_one_ok = j_minus_one >= 0;
+                let j_plus_one_ok = j_plus_one < a.len() as i32;
+
+                // top
+                if i_minus_one_ok {
+                    res[i - 1][j] += 1;
+                }
+                // top rigth
+                if i_minus_one_ok && j_plus_one_ok {
+                    res[i - 1][j + 1] += 1;
+                }
+                // rigth
+                if j_plus_one_ok {
+                    res[i][j + 1] += 1;
+                }
+                // rigth bottom
+                if i_plus_one_ok && j_plus_one_ok {
+                    res[i + 1][j + 1] += 1;
+                }
+                // bottom
+                if i_plus_one_ok {
+                    res[i + 1][j] += 1;
+                }
+                // bottom left
+                if i_plus_one_ok && j_minus_one_ok {
+                    res[i + 1][j - 1] += 1;
+                }
+                // left
+                if j_minus_one_ok {
+                    res[i][j - 1] += 1;
+                }
+                // top left
+                if i_minus_one_ok && j_minus_one_ok {
+                    res[i - 1][j - 1] += 1;
+                }
+            };
+        }
+    }
+
+    res
 }
 
 fn main() {
