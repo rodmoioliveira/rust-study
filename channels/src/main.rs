@@ -68,19 +68,19 @@ fn main() {
     // This is like retrieving the rubber duck from the water at the end of the river or like getting a
     // chat message.
 
-    let (tx, rx) = mpsc::channel();
+    // let (tx, rx) = mpsc::channel();
 
-    thread::spawn(move || {
-        let val = String::from("hi");
-        let val2 = String::from("Rudi!");
-        tx.send(val).unwrap();
-        tx.send(val2).unwrap();
-    });
+    // thread::spawn(move || {
+    //     let val = String::from("hi");
+    //     let val2 = String::from("Rudi!");
+    //     tx.send(val).unwrap();
+    //     tx.send(val2).unwrap();
+    // });
 
-    let received = rx.recv().unwrap();
-    let received2 = rx.recv().unwrap();
-    println!("Got: {}", received);
-    println!("Got: {}", received2);
+    // let received = rx.recv().unwrap();
+    // let received2 = rx.recv().unwrap();
+    // println!("Got: {}", received);
+    // println!("Got: {}", received2);
 
     // The receiving end of a channel has two useful methods: recv and try_recv. We’re using recv,
     // short for receive, which will block the main thread’s execution and wait until a value is
@@ -139,25 +139,25 @@ fn main() {
     // modifications that will prove the code in Listing 16-8 is running concurrently: the spawned
     // thread will now send multiple messages and pause for a second between each message.
 
-    let (tx, rx) = mpsc::channel();
+    // let (tx, rx) = mpsc::channel();
 
-    thread::spawn(move || {
-        let vals = vec![
-            String::from("hi"),
-            String::from("from"),
-            String::from("the"),
-            String::from("thread"),
-        ];
+    // thread::spawn(move || {
+    //     let vals = vec![
+    //         String::from("hi"),
+    //         String::from("from"),
+    //         String::from("the"),
+    //         String::from("thread"),
+    //     ];
 
-        for val in vals {
-            tx.send(val).unwrap();
-            thread::sleep(Duration::from_secs(1));
-        }
-    });
+    //     for val in vals {
+    //         tx.send(val).unwrap();
+    //         thread::sleep(Duration::from_secs(1));
+    //     }
+    // });
 
-    for received in rx {
-        println!("Got: {}", received);
-    }
+    // for received in rx {
+    //     println!("Got: {}", received);
+    // }
 
     // This time, the spawned thread has a vector of strings that we want to send to the main
     // thread. We iterate over them, sending each individually, and pause between each by calling
@@ -181,6 +181,14 @@ fn main() {
 
     let (tx, rx) = mpsc::channel();
     let tx1 = mpsc::Sender::clone(&tx);
+
+    for i in 1..10 {
+        let tx_ = tx.clone();
+        thread::spawn(move || {
+            thread::sleep(Duration::from_secs(i));
+            tx_.send("multiple threads".to_owned()).unwrap();
+        });
+    }
 
     thread::spawn(move || {
         let vals = vec![
